@@ -78,17 +78,17 @@ app.get('/getcond2', (req, res) => {
     })
 });
 
-const cond3_fn = (user) => {
-    const last_name_length = user.last_name.length;
-    const quote_length = user.quote.length;
-    const email = user.email;
+// const cond3_fn = (user) => {
+//     const last_name_length = user.last_name.length;
+//     const quote_length = user.quote.length;
+//     const email = user.email;
 
-    const includesName = email.includes(user.last_name) ? true: false;
+//     const includesName = email.includes(user.last_name) ? true: false;
 
-    if(user.last_name.charAt(last_name_length - 1) == 'M' && quote_length > 15 && includesName == true){
-        return true
-    }
-}
+//     if(user.last_name.charAt(last_name_length - 1) == 'M' && quote_length > 15 && includesName == true){
+//         return true
+//     }
+// }
 
 app.get('/getcond3', (req, res) => {
     Data.find({}).then((data_list) => {
@@ -127,6 +127,39 @@ app.get('/getcond4', (req, res) => {
         console.log(err);
     })
 });
+
+
+app.get('/getcond5', (req, res) => {
+    Data.find({}).then((data_list) => {
+        const allData = data_list;
+        const cityStats = {}
+
+        allData.forEach((obj) => {
+            const city = obj.city;
+            const income = obj.income;
+            const incomeValue = parseFloat(income.replace('$', ''));
+
+            // Update the city stats object
+            if (city in cityStats) {
+                cityStats[city].numUsers++;
+                cityStats[city].totalIncome += incomeValue;
+            } 
+            else {
+                cityStats[city] = { numUsers: 1, totalIncome: incomeValue };
+            }
+        });
+
+        const sortedCities = Object.entries(cityStats).sort((a, b) => b[1].numUsers - a[1].numUsers);
+        res.send(sortedCities.slice(0, 10));
+
+    }).catch((err) => {
+        console.log(err);
+    })
+});
+
+
+
+
 app.listen(PORT, (req, res) => {
     console.log("backend connected on port "+ PORT);
 });
